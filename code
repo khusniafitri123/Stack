@@ -1,0 +1,85 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+struct Stack {
+    int top;
+    unsigned capacity;
+    int* array;
+};
+
+struct Stack* createStack(unsigned capacity) {
+    struct Stack* stack = (struct Stack*) malloc(sizeof(struct Stack));
+    if (!stack) return NULL;
+    stack->top = -1;
+    stack->capacity = capacity;
+    stack->array = (int*) malloc(stack->capacity * sizeof(int));
+    if (!stack->array) return NULL;
+    return stack;
+}
+
+int isEmpty(struct Stack* stack) {
+    return stack->top == -1;
+}
+
+void push(struct Stack* stack, char item) {
+    stack->array[++stack->top] = item;
+}
+
+char pop(struct Stack* stack) {
+    if (!isEmpty(stack))
+        return stack->array[stack->top--];
+    return '$';
+}
+
+int isOpening(char ch) {
+    return ch == '(' || ch == '{' || ch == '[';
+}
+
+int isClosing(char ch) {
+    return ch == ')' || ch == '}' || ch == ']';
+}
+
+int isMatch(char a, char b) {
+    return (a == '(' && b == ')') || (a == '{' && b == '}') || (a == '[' && b == ']');
+}
+
+int isBalanced(char* expr) {
+    struct Stack* stack = createStack(strlen(expr));
+    if (!stack) return 0;
+
+    for (int i = 0; i < strlen(expr); i++) {
+        if (isOpening(expr[i])) {
+            push(stack, expr[i]);
+        } else if (isClosing(expr[i])) {
+            if (isEmpty(stack) || !isMatch(pop(stack), expr[i])) {
+                free(stack->array);
+                free(stack);
+                return 0;
+            }
+        }
+    }
+
+    if (!isEmpty(stack)) {
+        free(stack->array);
+        free(stack);
+        return 0;
+    }
+
+    free(stack->array);
+    free(stack);
+    return 1;
+}
+
+int main() {
+    char expression[100];
+    scanf("%s", expression);
+    
+    if (isBalanced(expression)) {
+        printf("YES\n");
+    } else {
+        printf("NO\n");
+    }
+    
+    return 0;
+}
